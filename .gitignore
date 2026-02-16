@@ -1,1 +1,15 @@
-__pycache__/  *.pyc  venv/  node_modules/  .env 
+__pycache__/
+*.pyc
+venv/
+node_modules/
+.env
+*.db
+*.sqlite
+*.sqlite3
+migrations/
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
