@@ -34,7 +34,7 @@ autonova-erp/
 ## Development Environment Setup
 
 ### Prerequisites
-- Python 3.7 or higher
+- Python 3.8 or higher (3.9+ recommended)
 - pip (Python package manager)
 - Virtual environment tool (venv or virtualenv)
 
@@ -100,7 +100,7 @@ No linting tools are currently configured. Common Python linters include:
    - Run `pip install -r backend/requirements.txt` to install them
    - Check for security vulnerabilities before adding
 
-4. **Python Version:** Ensure compatibility with Python 3.7+ when writing code.
+4. **Python Version:** Ensure compatibility with Python 3.8+ (preferably 3.9+) when writing code.
 
 5. **Flask Best Practices:**
    - Follow Flask application factory pattern for better modularity
