@@ -18,3 +18,4 @@ python seed.py
 
 # 7. Start the server
 python app.py
+
