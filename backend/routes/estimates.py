@@ -364,8 +364,9 @@ def add_parts_to_estimate(estimate_id):
     if quantity <= 0:
         return jsonify({'error': 'Quantity must be greater than 0'}), 400
     
+    # Allow zero unit price for free parts (warranty, promotional items, etc.)
     if unit_price < 0:
-        return jsonify({'error': 'Unit price must be greater than or equal to 0'}), 400
+        return jsonify({'error': 'Unit price cannot be negative'}), 400
     
     # Calculate total price
     unit_price_decimal = Decimal(str(unit_price))
@@ -436,8 +437,9 @@ def update_estimate_part(estimate_id, part_id):
             return jsonify({'error': 'Quantity must be greater than 0'}), 400
         part.quantity = data['quantity']
     if 'unit_price' in data:
+        # Allow zero unit price for free parts (warranty, promotional items, etc.)
         if data['unit_price'] < 0:
-            return jsonify({'error': 'Unit price must be greater than or equal to 0'}), 400
+            return jsonify({'error': 'Unit price cannot be negative'}), 400
         part.unit_price = Decimal(str(data['unit_price']))
     if 'notes' in data:
         part.notes = data['notes']
@@ -535,6 +537,7 @@ def add_labour_to_estimate(estimate_id):
     if hours <= 0:
         return jsonify({'error': 'Hours must be greater than 0'}), 400
     
+    # Labour cannot be free - hourly rate must be positive
     if hourly_rate <= 0:
         return jsonify({'error': 'Hourly rate must be greater than 0'}), 400
     
@@ -605,6 +608,7 @@ def update_estimate_labour(estimate_id, labour_id):
             return jsonify({'error': 'Hours must be greater than 0'}), 400
         labour.hours = Decimal(str(data['hours']))
     if 'hourly_rate' in data:
+        # Labour cannot be free - hourly rate must be positive
         if data['hourly_rate'] <= 0:
             return jsonify({'error': 'Hourly rate must be greater than 0'}), 400
         labour.hourly_rate = Decimal(str(data['hourly_rate']))
