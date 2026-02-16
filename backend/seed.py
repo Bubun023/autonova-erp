@@ -2,7 +2,7 @@
 Seed script to populate initial data for AutoNova ERP
 """
 from app import create_app
-from models import db, Role, User
+from models import db, Role, User, InsuranceCompany
 
 
 def seed_database():
@@ -62,6 +62,37 @@ def seed_database():
             print("    Email: admin@autonova.com")
         else:
             print("  - Admin user already exists")
+        
+        # Create sample insurance companies
+        print("\nCreating sample insurance companies...")
+        insurance_companies_data = [
+            {
+                'name': 'State Farm Insurance',
+                'phone': '555-0100',
+                'email': 'claims@statefarm.example.com'
+            },
+            {
+                'name': 'Geico Insurance',
+                'phone': '555-0200',
+                'email': 'claims@geico.example.com'
+            },
+            {
+                'name': 'Progressive Insurance',
+                'phone': '555-0300',
+                'email': 'claims@progressive.example.com'
+            }
+        ]
+        
+        for company_data in insurance_companies_data:
+            existing_company = InsuranceCompany.query.filter_by(name=company_data['name']).first()
+            if not existing_company:
+                company = InsuranceCompany(**company_data)
+                db.session.add(company)
+                print(f"  ✓ Created insurance company: {company_data['name']}")
+            else:
+                print(f"  - Insurance company already exists: {company_data['name']}")
+        
+        db.session.commit()
         
         print("\n✅ Database seeding completed successfully!")
         print("\nYou can now login with:")
