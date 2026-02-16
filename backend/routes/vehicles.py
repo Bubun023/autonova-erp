@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
 from models import db, Vehicle, Customer
-from utils import role_required
+from utils import role_required, validate_vin
 
 vehicles_bp = Blueprint('vehicles', __name__, url_prefix='/api/vehicles')
 
@@ -68,6 +68,12 @@ def create_vehicle():
     if not customer:
         return jsonify({'error': 'Customer not found'}), 404
     
+    # Validate VIN if provided
+    if 'vin' in data and data['vin']:
+        is_valid, error_message = validate_vin(data['vin'])
+        if not is_valid:
+            return jsonify({'error': error_message}), 400
+    
     # Create new vehicle
     vehicle = Vehicle(
         customer_id=data['customer_id'],
@@ -112,14 +118,19 @@ def update_vehicle(vehicle_id):
             return jsonify({'error': 'Customer not found'}), 404
         vehicle.customer_id = data['customer_id']
     
+    if 'vin' in data and data['vin']:
+        # Validate VIN
+        is_valid, error_message = validate_vin(data['vin'])
+        if not is_valid:
+            return jsonify({'error': error_message}), 400
+        vehicle.vin = data['vin']
+    
     if 'make' in data:
         vehicle.make = data['make']
     if 'model' in data:
         vehicle.model = data['model']
     if 'year' in data:
         vehicle.year = data['year']
-    if 'vin' in data:
-        vehicle.vin = data['vin']
     if 'license_plate' in data:
         vehicle.license_plate = data['license_plate']
     if 'color' in data:

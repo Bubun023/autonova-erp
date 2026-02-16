@@ -4,7 +4,7 @@ from flask_jwt_extended import (
     jwt_required, get_jwt_identity
 )
 from models import db, User, Role
-from utils import get_current_user
+from utils import get_current_user, validate_password
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
@@ -19,6 +19,11 @@ def register():
     for field in required_fields:
         if field not in data:
             return jsonify({'error': f'Missing required field: {field}'}), 400
+    
+    # Validate password strength
+    is_valid, error_message = validate_password(data['password'])
+    if not is_valid:
+        return jsonify({'error': error_message}), 400
     
     # Check if username already exists
     if User.query.filter_by(username=data['username']).first():

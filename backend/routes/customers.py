@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
 from models import db, Customer
-from utils import role_required
+from utils import role_required, validate_email
 
 customers_bp = Blueprint('customers', __name__, url_prefix='/api/customers')
 
@@ -57,6 +57,10 @@ def create_customer():
         if field not in data:
             return jsonify({'error': f'Missing required field: {field}'}), 400
     
+    # Validate email if provided
+    if 'email' in data and data['email'] and not validate_email(data['email']):
+        return jsonify({'error': 'Invalid email format'}), 400
+    
     # Create new customer
     customer = Customer(
         first_name=data['first_name'],
@@ -89,6 +93,10 @@ def update_customer(customer_id):
         return jsonify({'error': 'Customer not found'}), 404
     
     data = request.get_json()
+    
+    # Validate email if provided
+    if 'email' in data and data['email'] and not validate_email(data['email']):
+        return jsonify({'error': 'Invalid email format'}), 400
     
     # Update fields if provided
     if 'first_name' in data:

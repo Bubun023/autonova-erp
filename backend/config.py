@@ -28,6 +28,14 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     """Production configuration"""
     DEBUG = False
+    
+    def __init__(self):
+        super().__init__()
+        # Ensure production secrets are set
+        if self.SECRET_KEY == 'dev-secret-key-change-in-production':
+            raise ValueError('SECRET_KEY must be set in production environment')
+        if self.JWT_SECRET_KEY == 'jwt-secret-key-change-in-production':
+            raise ValueError('JWT_SECRET_KEY must be set in production environment')
 
 
 class TestingConfig(Config):

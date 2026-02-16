@@ -2,6 +2,7 @@ from functools import wraps
 from flask import jsonify
 from flask_jwt_extended import get_jwt_identity
 from models import User
+import re
 
 
 def get_current_user():
@@ -41,3 +42,56 @@ def role_required(*allowed_roles):
         
         return wrapper
     return decorator
+
+
+def validate_password(password):
+    """
+    Validate password strength.
+    
+    Returns:
+        tuple: (is_valid, error_message)
+    """
+    if len(password) < 8:
+        return False, 'Password must be at least 8 characters long'
+    
+    if not re.search(r'[A-Za-z]', password):
+        return False, 'Password must contain at least one letter'
+    
+    if not re.search(r'[0-9]', password):
+        return False, 'Password must contain at least one number'
+    
+    return True, None
+
+
+def validate_email(email):
+    """
+    Validate email format.
+    
+    Returns:
+        bool: True if valid, False otherwise
+    """
+    if not email:
+        return True  # Email is optional
+    
+    email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return bool(re.match(email_pattern, email))
+
+
+def validate_vin(vin):
+    """
+    Validate VIN format (17 characters, alphanumeric, excluding I, O, Q).
+    
+    Returns:
+        tuple: (is_valid, error_message)
+    """
+    if not vin:
+        return True, None  # VIN is optional
+    
+    if len(vin) != 17:
+        return False, 'VIN must be exactly 17 characters'
+    
+    # VIN should only contain alphanumeric characters except I, O, Q
+    if not re.match(r'^[A-HJ-NPR-Z0-9]{17}$', vin, re.IGNORECASE):
+        return False, 'VIN contains invalid characters (I, O, Q are not allowed)'
+    
+    return True, None
