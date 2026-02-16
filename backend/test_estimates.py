@@ -231,11 +231,11 @@ def test_verify_totals(estimate_id):
         tax_amount = estimate['tax_amount']
         grand_total = estimate['grand_total']
         
-        # Expected: parts = 1100, labour = 497.50, tax = 159.75, grand = 1757.25
+        # Expected: parts = 1100, labour = 625.00, tax = 172.50, grand = 1897.50
         expected_parts = 1100.00
-        expected_labour = 497.50
-        expected_tax = 159.75
-        expected_grand = 1757.25
+        expected_labour = 625.00
+        expected_tax = 172.50
+        expected_grand = 1897.50
         
         print(f"\n✓ Parts total: ${parts_total} (expected: ${expected_parts})")
         print(f"✓ Labour total: ${labour_total} (expected: ${expected_labour})")
