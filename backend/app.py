@@ -11,6 +11,8 @@ from models import db, bcrypt
 from routes.auth import auth_bp
 from routes.customers import customers_bp
 from routes.vehicles import vehicles_bp
+from routes.insurance_companies import insurance_companies_bp
+from routes.estimates import estimates_bp
 
 # Load environment variables
 load_dotenv()
@@ -39,6 +41,8 @@ def create_app(config_name=None):
     app.register_blueprint(auth_bp)
     app.register_blueprint(customers_bp)
     app.register_blueprint(vehicles_bp)
+    app.register_blueprint(insurance_companies_bp)
+    app.register_blueprint(estimates_bp)
     
     # Health check endpoint
     @app.route('/health')
