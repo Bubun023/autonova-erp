@@ -1,17 +1,21 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import (
     create_access_token, create_refresh_token,
     jwt_required, get_jwt_identity
 )
 from models import db, User, Role
-from utils import get_current_user, validate_password
+from utils import get_current_user, validate_password, role_required
+import logging
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
+logger = logging.getLogger(__name__)
 
 
 @auth_bp.route('/register', methods=['POST'])
+@jwt_required()
+@role_required('admin')
 def register():
-    """Register a new user"""
+    """Register a new user (admin only)"""
     data = request.get_json()
     
     # Validate required fields
@@ -52,13 +56,16 @@ def register():
         db.session.add(user)
         db.session.commit()
         
+        logger.info(f"New user created: {user.username} with role: {role.name}")
+        
         return jsonify({
             'message': 'User registered successfully',
             'user': user.to_dict()
         }), 201
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        logger.error(f"Error creating user: {str(e)}")
+        return jsonify({'error': 'Failed to create user'}), 500
 
 
 @auth_bp.route('/login', methods=['POST'])

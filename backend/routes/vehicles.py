@@ -2,8 +2,10 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
 from models import db, Vehicle, Customer
 from utils import role_required, validate_vin
+import logging
 
 vehicles_bp = Blueprint('vehicles', __name__, url_prefix='/api/vehicles')
+logger = logging.getLogger(__name__)
 
 
 @vehicles_bp.route('', methods=['GET'])
@@ -90,13 +92,16 @@ def create_vehicle():
         db.session.add(vehicle)
         db.session.commit()
         
+        logger.info(f"Vehicle created: {vehicle.year} {vehicle.make} {vehicle.model} (ID: {vehicle.id})")
+        
         return jsonify({
             'message': 'Vehicle created successfully',
             'vehicle': vehicle.to_dict()
         }), 201
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        logger.error(f"Error creating vehicle: {str(e)}")
+        return jsonify({'error': 'Failed to create vehicle'}), 500
 
 
 @vehicles_bp.route('/<int:vehicle_id>', methods=['PUT'])
@@ -141,13 +146,16 @@ def update_vehicle(vehicle_id):
     try:
         db.session.commit()
         
+        logger.info(f"Vehicle updated: ID {vehicle_id}")
+        
         return jsonify({
             'message': 'Vehicle updated successfully',
             'vehicle': vehicle.to_dict()
         }), 200
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        logger.error(f"Error updating vehicle {vehicle_id}: {str(e)}")
+        return jsonify({'error': 'Failed to update vehicle'}), 500
 
 
 @vehicles_bp.route('/<int:vehicle_id>', methods=['DELETE'])
@@ -163,9 +171,12 @@ def delete_vehicle(vehicle_id):
         db.session.delete(vehicle)
         db.session.commit()
         
+        logger.info(f"Vehicle deleted: ID {vehicle_id}")
+        
         return jsonify({
             'message': 'Vehicle deleted successfully'
         }), 200
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        logger.error(f"Error deleting vehicle {vehicle_id}: {str(e)}")
+        return jsonify({'error': 'Failed to delete vehicle'}), 500

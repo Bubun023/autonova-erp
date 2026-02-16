@@ -2,8 +2,10 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
 from models import db, Customer
 from utils import role_required, validate_email
+import logging
 
 customers_bp = Blueprint('customers', __name__, url_prefix='/api/customers')
+logger = logging.getLogger(__name__)
 
 
 @customers_bp.route('', methods=['GET'])
@@ -74,13 +76,16 @@ def create_customer():
         db.session.add(customer)
         db.session.commit()
         
+        logger.info(f"Customer created: {customer.first_name} {customer.last_name} (ID: {customer.id})")
+        
         return jsonify({
             'message': 'Customer created successfully',
             'customer': customer.to_dict()
         }), 201
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        logger.error(f"Error creating customer: {str(e)}")
+        return jsonify({'error': 'Failed to create customer'}), 500
 
 
 @customers_bp.route('/<int:customer_id>', methods=['PUT'])
@@ -113,13 +118,16 @@ def update_customer(customer_id):
     try:
         db.session.commit()
         
+        logger.info(f"Customer updated: ID {customer_id}")
+        
         return jsonify({
             'message': 'Customer updated successfully',
             'customer': customer.to_dict()
         }), 200
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        logger.error(f"Error updating customer {customer_id}: {str(e)}")
+        return jsonify({'error': 'Failed to update customer'}), 500
 
 
 @customers_bp.route('/<int:customer_id>', methods=['DELETE'])
@@ -135,9 +143,12 @@ def delete_customer(customer_id):
         db.session.delete(customer)
         db.session.commit()
         
+        logger.info(f"Customer deleted: ID {customer_id}")
+        
         return jsonify({
             'message': 'Customer deleted successfully'
         }), 200
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        logger.error(f"Error deleting customer {customer_id}: {str(e)}")
+        return jsonify({'error': 'Failed to delete customer'}), 500

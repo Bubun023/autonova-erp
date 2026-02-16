@@ -4,6 +4,7 @@ from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from flask_migrate import Migrate
 from dotenv import load_dotenv
+import logging
 
 from config import config
 from models import db, bcrypt
@@ -13,6 +14,10 @@ from routes.vehicles import vehicles_bp
 
 # Load environment variables
 load_dotenv()
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def create_app(config_name=None):
@@ -53,6 +58,7 @@ def create_app(config_name=None):
     @app.errorhandler(500)
     def internal_error(error):
         db.session.rollback()
+        logger.error(f"Internal server error: {error}")
         return jsonify({
             'error': 'Internal server error'
         }), 500
@@ -96,4 +102,8 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    # Get host and port from environment or use defaults
+    host = os.environ.get('FLASK_HOST', '127.0.0.1')
+    port = int(os.environ.get('FLASK_PORT', 5000))
+    
+    app.run(host=host, port=port, debug=False)
