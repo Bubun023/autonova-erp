@@ -1,6 +1,9 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from datetime import datetime
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import Integer, String, DateTime, Boolean, ForeignKey
+from typing import List
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -10,13 +13,13 @@ class Role(db.Model):
     """Role model for user permissions"""
     __tablename__ = 'roles'
     
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True, nullable=False)
-    description = db.Column(db.String(200))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
+    description: Mapped[str] = mapped_column(String(200), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     
     # Relationships
-    users = db.relationship('User', backref='role', lazy=True)
+    users: Mapped[List["User"]] = relationship('User', back_populates='role')
     
     def to_dict(self):
         """Convert role to dictionary"""
@@ -35,16 +38,19 @@ class User(db.Model):
     """User model for authentication"""
     __tablename__ = 'users'
     
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
-    first_name = db.Column(db.String(50), nullable=False)
-    last_name = db.Column(db.String(50), nullable=False)
-    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
-    is_active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    username: Mapped[str] = mapped_column(String(80), unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(128), nullable=False)
+    first_name: Mapped[str] = mapped_column(String(50), nullable=False)
+    last_name: Mapped[str] = mapped_column(String(50), nullable=False)
+    role_id: Mapped[int] = mapped_column(Integer, ForeignKey('roles.id'), nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    role: Mapped["Role"] = relationship('Role', back_populates='users')
     
     def set_password(self, password):
         """Hash and set user password"""
@@ -76,17 +82,17 @@ class Customer(db.Model):
     """Customer model"""
     __tablename__ = 'customers'
     
-    id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(50), nullable=False)
-    last_name = db.Column(db.String(50), nullable=False)
-    email = db.Column(db.String(120))
-    phone = db.Column(db.String(20), nullable=False)
-    address = db.Column(db.String(200))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    first_name: Mapped[str] = mapped_column(String(50), nullable=False)
+    last_name: Mapped[str] = mapped_column(String(50), nullable=False)
+    email: Mapped[str] = mapped_column(String(120), nullable=True)
+    phone: Mapped[str] = mapped_column(String(20), nullable=False)
+    address: Mapped[str] = mapped_column(String(200), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships - cascade delete for customer vehicles
-    vehicles = db.relationship('Vehicle', backref='owner', lazy=True, cascade='all, delete-orphan')
+    vehicles: Mapped[List["Vehicle"]] = relationship('Vehicle', back_populates='owner', cascade='all, delete-orphan')
     
     def to_dict(self, include_vehicles=False):
         """Convert customer to dictionary"""
@@ -114,17 +120,20 @@ class Vehicle(db.Model):
     """Vehicle model"""
     __tablename__ = 'vehicles'
     
-    id = db.Column(db.Integer, primary_key=True)
-    customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
-    make = db.Column(db.String(50), nullable=False)
-    model = db.Column(db.String(50), nullable=False)
-    year = db.Column(db.Integer, nullable=False)
-    vin = db.Column(db.String(17), unique=True)
-    license_plate = db.Column(db.String(20))
-    color = db.Column(db.String(30))
-    mileage = db.Column(db.Integer)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    customer_id: Mapped[int] = mapped_column(Integer, ForeignKey('customers.id'), nullable=False)
+    make: Mapped[str] = mapped_column(String(50), nullable=False)
+    model: Mapped[str] = mapped_column(String(50), nullable=False)
+    year: Mapped[int] = mapped_column(Integer, nullable=False)
+    vin: Mapped[str] = mapped_column(String(17), unique=True, nullable=True)
+    license_plate: Mapped[str] = mapped_column(String(20), nullable=True)
+    color: Mapped[str] = mapped_column(String(30), nullable=True)
+    mileage: Mapped[int] = mapped_column(Integer, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    owner: Mapped["Customer"] = relationship('Customer', back_populates='vehicles')
     
     def to_dict(self, include_owner=False):
         """Convert vehicle to dictionary"""

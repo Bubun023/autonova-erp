@@ -12,6 +12,11 @@ def seed_database():
     with app.app_context():
         print("Starting database seeding...")
         
+        # Create all tables if they don't exist
+        print("\nCreating database tables...")
+        db.create_all()
+        print("  ✓ Database tables created")
+        
         # Create roles
         roles_data = [
             {'name': 'admin', 'description': 'System administrator with full access'},
